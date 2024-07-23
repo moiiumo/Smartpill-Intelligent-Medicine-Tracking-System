@@ -1,0 +1,38 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_ml_model_downloader/firebase_ml_model_downloader.dart';
+import 'package:flutter/material.dart';
+
+class MedicationClassifier {
+  final FirebaseModelDownloader _modelDownloader = FirebaseModelDownloader.instance;
+
+  Future<void> classifyMedicationUsage(String userId) async {
+    // Download the custom model from Firebase ML Kit
+    final model = await _modelDownloader.getModel('medication_classifier',
+        FirebaseModelDownloadType.latestModel,
+        FirebaseModelDownloadConditions(androidRequireWifi: true));
+        
+    // Load the model and make predictions
+    // (Implementation of loading and running the model will depend on the model format)
+    // Example: TensorFlow Lite model inference code here
+
+    // Fetch user medication data from Firestore
+    final medicationData = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('medication_usage')
+        .get();
+        
+    // Example: Using the model to predict medication behavior
+    medicationData.docs.forEach((doc) {
+      final data = doc.data();
+      // Use the model to classify the medication usage
+      // final prediction = model.predict([data['time'], data['medication_type'], data['dosage']]);
+      
+      // Example prediction result (mockup)
+      final prediction = 'on_time'; // or 'late', 'missed'
+      
+      // Update Firestore with the prediction result
+      doc.reference.update({'prediction': prediction});
+    });
+  }
+}
